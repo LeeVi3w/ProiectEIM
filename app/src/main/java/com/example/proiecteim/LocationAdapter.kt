@@ -1,5 +1,7 @@
 package com.example.proiecteim
 
+import android.content.Intent
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -32,6 +34,12 @@ class LocationAdapter (
         holder.itemView.apply {
             val displayText = currLocation.name + " - " + currLocation.currTemp + "°C"
             locationEntry.text = displayText
+
+            locationEntry.setOnClickListener {
+                val intent = Intent(this.context, LocationActivity::class.java)
+                intent.putExtra("Location", currLocation)
+                this.context.startActivity(intent)
+            }
 
             deleteButton.setOnClickListener {
                 locations.removeAt(position)

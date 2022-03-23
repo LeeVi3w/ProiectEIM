@@ -1,6 +1,8 @@
 package com.example.proiecteim
 
 import android.os.Bundle
+import android.os.Parcelable
+import android.os.PersistableBundle
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -13,12 +15,13 @@ import java.net.URL
 class MainActivity : AppCompatActivity() {
 
     private lateinit var locationAdapter: LocationAdapter
+    private var mutableLocationList: MutableList<Location> = mutableListOf()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-
-        locationAdapter = LocationAdapter(mutableListOf())
+        Log.d("MainActivity", " ~~~~~~ON CREATE~~~~~~~")
+        locationAdapter = LocationAdapter(mutableLocationList)
 
         locationList.adapter = locationAdapter
         locationList.layoutManager = LinearLayoutManager(this)
@@ -30,6 +33,20 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        Log.i("MainActivity", "Saved instance")
+
+        outState.putParcelableArrayList("MutableLocationsList", ArrayList(mutableLocationList))
+    }
+
+    override fun onRestoreInstanceState(savedInstanceState: Bundle) {
+        super.onRestoreInstanceState(savedInstanceState)
+        mutableLocationList = savedInstanceState.getParcelableArrayList<Location>("MutableLocationsList")!!
+
+        Log.d("MainActivity", " ~~~~~~ON RESTORE INSTANCE~~~~~~~")
     }
 
     private fun addLocation(cityName: String) {

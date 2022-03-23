@@ -7,7 +7,11 @@
         <entry key="..\:/Facultate/EIM/ProiectEIM/app/src/main/res/drawable/background.xml" value="0.2265" />
         <entry key="..\:/Facultate/EIM/ProiectEIM/app/src/main/res/drawable/ic_launcher_background.xml" value="0.2265" />
         <entry key="..\:/Facultate/EIM/ProiectEIM/app/src/main/res/drawable/location_entry_background.xml" value="0.196" />
+        <entry key="..\:/Facultate/EIM/ProiectEIM/app/src/main/res/layout/activity_location.xml" value="0.2" />
         <entry key="..\:/Facultate/EIM/ProiectEIM/app/src/main/res/layout/activity_main.xml" value="0.22826086956521738" />
+        <entry key="..\:/Facultate/EIM/ProiectEIM/app/src/main/res/layout/activity_main2.xml" value="0.18802083333333333" />
+        <entry key="..\:/Facultate/EIM/ProiectEIM/app/src/main/res/layout/fragment_extra_info.xml" value="0.18802083333333333" />
+        <entry key="..\:/Facultate/EIM/ProiectEIM/app/src/main/res/layout/fragment_set_alert.xml" value="0.18802083333333333" />
         <entry key="..\:/Facultate/EIM/ProiectEIM/app/src/main/res/layout/item_location.xml" value="0.18802083333333333" />
       </map>
     </option>
