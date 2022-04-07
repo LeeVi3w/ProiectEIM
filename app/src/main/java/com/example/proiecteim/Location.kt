@@ -9,15 +9,18 @@ data class Location (
     val maxTemp: Float,
     val minTemp: Float,
     val pressure: Int,
-    val humidity: Int
+    val humidity: Int,
+    var alertTemp: Float?
 ) : Parcelable {
+
     constructor(parcel: Parcel) : this(
         parcel.readString(),
         parcel.readFloat(),
         parcel.readFloat(),
         parcel.readFloat(),
         parcel.readInt(),
-        parcel.readInt()
+        parcel.readInt(),
+        parcel.readValue(Float::class.java.classLoader) as? Float
     )
 
     override fun writeToParcel(parcel: Parcel, flags: Int) {
@@ -27,6 +30,7 @@ data class Location (
         parcel.writeFloat(minTemp)
         parcel.writeInt(pressure)
         parcel.writeInt(humidity)
+        parcel.writeValue(alertTemp)
     }
 
     override fun describeContents(): Int {
