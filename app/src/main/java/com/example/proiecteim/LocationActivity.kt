@@ -24,8 +24,8 @@ class LocationActivity : AppCompatActivity() {
         val extraInfoFragment = ExtraInfoFragment.newInstance(location)
         val setAlertFragment = SetAlertFragment.newInstance(location)
 
-        val alertTemp: String = if (location!!.alertTemp != null)
-            "\n(Alert: ${location!!.alertTemp.toString()}°C)"
+        val alertTemp: String = if (location!!.alertMinTemp != null && location!!.alertMaxTemp != null)
+            "\n(Alert: ${location!!.alertMinTemp.toString()} - ${location!!.alertMaxTemp.toString()}°C)"
         else
             ""
 
@@ -57,7 +57,6 @@ class LocationActivity : AppCompatActivity() {
 
     override fun onBackPressed() {
         val intent = Intent()
-        Log.d("onBackPressed", location!!.alertTemp.toString())
         intent.putExtra("Location", location)
         intent.putExtra("LocationIdx", getIntent().extras?.getInt("LocationIdx"))
         setResult(RESULT_OK, intent)

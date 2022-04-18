@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "223108065077",
+    "project_id": "proiecteim-b2735",
+    "firebase_url": "https://proiecteim-b2735-default-rtdb.europe-west1.firebasedatabase.app",
+    "storage_bucket": "proiecteim-b2735.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:223108065077:android:a6c04982fbe967d7fd4e7c",
+        "android_client_info": {
+          "package_name": "com.example.proiecteim"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "223108065077-s9irm7hmuqr1uu93k35hl0qauspl7mfm.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCE9sZE3my7AcyeABPlLZMHe3_JRmK8PX4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "223108065077-s9irm7hmuqr1uu93k35hl0qauspl7mfm.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

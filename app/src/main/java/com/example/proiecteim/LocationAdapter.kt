@@ -32,7 +32,6 @@ class LocationAdapter (
 
     fun setLocation(position: Int, location: Location) {
         locations[position] = location
-        Log.d("setLocation", location.alertTemp.toString())
         notifyItemChanged(position)
     }
 
@@ -42,7 +41,6 @@ class LocationAdapter (
 
     override fun onBindViewHolder(holder: LocationViewHolder, position: Int) {
         val currLocation = locations[position]
-        Log.d("onBindViewHolder", currLocation.alertTemp.toString())
         holder.itemView.apply {
             val displayText = currLocation.name + " - " + currLocation.currTemp + "°C"
             locationEntry.text = displayText

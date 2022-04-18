@@ -28,11 +28,11 @@ class ExtraInfoFragment : Fragment() {
     ): View {
         val rootView: View = inflater.inflate(R.layout.fragment_extra_info, container, false)
 
-        val minTempText = "Minimum Temperature\n\n${location!!.minTemp}°C"
-        rootView.tvMinTemp.text = minTempText
+        val minTempText = "Feels like\n\n${location!!.feelsLike}°C"
+        rootView.tvFeelsLike.text = minTempText
 
-        val maxTempText = "Maximum Temperature\n\n${location!!.maxTemp}°C"
-        rootView.tvMaxTemp.text = maxTempText
+        val maxTempText = "Wind speed\n\n${location!!.windSpeed} m/s"
+        rootView.tvWindSpeed.text = maxTempText
 
         val humidityText = "Humidity\n\n${location!!.humidity}%"
         rootView.tvHumidity.text = humidityText

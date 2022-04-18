@@ -10,13 +10,13 @@
 
     <TextView
         android:id="@+id/tvCurrentTemp"
-        android:layout_width="254dp"
-        android:layout_height="117dp"
+        android:layout_width="320dp"
+        android:layout_height="113dp"
         android:layout_marginTop="28dp"
-        android:background="@color/locationOrange"
+        android:background="@color/locationColor"
         android:textAlignment="center"
         android:textColor="@color/white"
-        android:textSize="28sp"
+        android:textSize="24sp"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.496"

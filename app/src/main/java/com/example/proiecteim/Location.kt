@@ -6,11 +6,12 @@ import android.os.Parcelable
 data class Location (
     val name: String?,
     val currTemp: Float,
-    val maxTemp: Float,
-    val minTemp: Float,
+    val feelsLike: Float,
+    val windSpeed: Float,
     val pressure: Int,
     val humidity: Int,
-    var alertTemp: Float?
+    var alertMinTemp: Float?,
+    var alertMaxTemp: Float?
 ) : Parcelable {
 
     constructor(parcel: Parcel) : this(
@@ -20,17 +21,19 @@ data class Location (
         parcel.readFloat(),
         parcel.readInt(),
         parcel.readInt(),
+        parcel.readValue(Float::class.java.classLoader) as? Float,
         parcel.readValue(Float::class.java.classLoader) as? Float
     )
 
     override fun writeToParcel(parcel: Parcel, flags: Int) {
         parcel.writeString(name)
         parcel.writeFloat(currTemp)
-        parcel.writeFloat(maxTemp)
-        parcel.writeFloat(minTemp)
+        parcel.writeFloat(feelsLike)
+        parcel.writeFloat(windSpeed)
         parcel.writeInt(pressure)
         parcel.writeInt(humidity)
-        parcel.writeValue(alertTemp)
+        parcel.writeValue(alertMinTemp)
+        parcel.writeValue(alertMaxTemp)
     }
 
     override fun describeContents(): Int {
