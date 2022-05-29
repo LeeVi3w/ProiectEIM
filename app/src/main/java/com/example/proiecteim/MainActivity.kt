@@ -44,9 +44,7 @@ class MainActivity : AppCompatActivity(), ConnectivityReceiver.ConnectivityRecei
         locationAdapter = LocationAdapter(mutableLocationList)
         loadData()
 
-//        Thread {
-            startService()
-//        }.start()
+        startService()
 
         locationList.adapter = locationAdapter
         locationList.layoutManager = LinearLayoutManager(this)
@@ -96,6 +94,10 @@ class MainActivity : AppCompatActivity(), ConnectivityReceiver.ConnectivityRecei
             }
         }
 
+        btMap.setOnClickListener {
+            val intent = Intent(this, MapActivity::class.java)
+            startActivity(intent)
+        }
     }
 
     override fun onNetworkConnectionChanged(isConnected: Boolean) {
@@ -211,7 +213,7 @@ class MainActivity : AppCompatActivity(), ConnectivityReceiver.ConnectivityRecei
                         alertMaxTemp
                     )
 
-                    Log.d("postSnapshot", newLocation.toString())
+//                    Log.d("postSnapshot", newLocation.toString())
                     locationAdapter.addLocation(newLocation)
                 }
             }

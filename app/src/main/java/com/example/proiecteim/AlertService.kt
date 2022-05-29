@@ -77,6 +77,8 @@ class AlertService : Service() {
     private fun checkAlerts() {
         databaseReference = FirebaseDatabase.getInstance(DB_INSTANCE_URL).getReference("Locations")
 
+        HttpsTrustManager.allowAllSSL()
+
         Thread {
             while (isServiceStarted) {
                 databaseReference.addListenerForSingleValueEvent(object : ValueEventListener {
@@ -102,10 +104,10 @@ class AlertService : Service() {
                                     (locationHashmap["alertMaxTemp"] as Long).toFloat()
                             }
 
-                            Log.d("Service - City", locationName)
+//                            Log.d("Service - City", locationName)
 
                             val currentWeather = getWeather(locationName)
-                            Log.d("Service - Temps", "$alertMinTemp --- $alertMaxTemp --- ${currentWeather.getString("temp")}")
+//                            Log.d("Service - Temps", "$alertMinTemp --- $alertMaxTemp --- ${currentWeather.getString("temp")}")
                             if (alertMinTemp != null && alertMaxTemp != null) {
                                 val currTemp = currentWeather.getString("temp").toFloat()
                                 if (alertMinTemp <= currTemp && currTemp <= alertMaxTemp) {
@@ -145,7 +147,6 @@ class AlertService : Service() {
                     }
 
                     override fun onCancelled(error: DatabaseError) {
-                        TODO("Not yet implemented")
                     }
 
                 })
@@ -154,15 +155,15 @@ class AlertService : Service() {
         }.start()
 
 
-        // Get alerts from meteoromania.ro
-        Thread {
-            val url = "https://www.meteoromania.ro/avertizari-xml.php"
-            val resultXML = URL(url).readText()
-
-            Log.d("XML", resultXML.substring(0, 100))
-
-            Thread.sleep(30000)
-        }.start()
+        // Get alerts from meteoromania.ro ---- Not really viable, their XML is an unstructured mess
+//        Thread {
+//            val url = "https://www.meteoromania.ro/avertizari-xml.php"
+//            val resultXML = URL(url).readText()
+//
+//            Log.d("XML", resultXML.substring(2500, 2600))
+//
+//            Thread.sleep(30000)
+//        }.start()
     }
 
     fun getWeather(cityName: String): JSONObject {
@@ -182,7 +183,7 @@ class AlertService : Service() {
         resultWeatherData.put("humidity", mainJSONObject.getString("humidity"))
         resultWeatherData.put("speed", windJSONObject.getString("speed"))
         resultWeatherData.put("description", weatherJSONArray.getJSONObject(0).getString("main"))
-        Log.d("Description", resultWeatherData.getString("description"))
+//        Log.d("Description", resultWeatherData.getString("description"))
         return resultWeatherData
     }
 
