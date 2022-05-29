@@ -8,14 +8,23 @@ import android.util.Log
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
+import com.google.firebase.database.*
+import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.*
+import org.json.JSONObject
 import java.lang.Runnable
+import java.net.URL
 
 class AlertService : Service() {
     private val channelId = "Notification from Service"
     private lateinit var runnable: Runnable
     private var isServiceStarted = false
     private var wakeLock: PowerManager.WakeLock? = null
+    private lateinit var databaseReference: DatabaseReference
+    private val DB_INSTANCE_URL = "https://proiecteim-b2735-default-rtdb.europe-west1.firebasedatabase.app"
+    private val thisService = this
+    private var currNotificationID = 1
 
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate() {
@@ -27,19 +36,20 @@ class AlertService : Service() {
                 NotificationManager.IMPORTANCE_HIGH
             )
         (getSystemService(NOTIFICATION_SERVICE) as NotificationManager).createNotificationChannel(channel)
+        val policy = StrictMode.ThreadPolicy.Builder().permitAll().build()
+        StrictMode.setThreadPolicy(policy)
 }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         Log.d("SERVICE", Build.VERSION.SDK_INT.toString())
-        val input = intent?.getStringExtra("inputExtra")
         val notificationIntent = Intent(this, MainActivity::class.java)
         val pendingIntent = PendingIntent.getActivity(
             this,
             0, notificationIntent, 0
         )
         val notification: Notification = NotificationCompat.Builder(this, channelId)
-            .setContentTitle("Example Service")
-            .setContentText(input)
+            .setContentTitle("Service started")
+            .setContentText("")
             .setSmallIcon(R.drawable.background)
             .setContentIntent(pendingIntent)
             .build()
@@ -61,15 +71,119 @@ class AlertService : Service() {
             }
         }
 
-        GlobalScope.launch(Dispatchers.IO) {
-            while (isServiceStarted) {
-                launch(Dispatchers.IO) {
+        checkAlerts()
+    }
 
-                    Log.d("ServiceRepeat", "SERVICE SERVICE SERVICE SERVICE")
-                }
-                delay(1 * 3 * 1000)
+    private fun checkAlerts() {
+        databaseReference = FirebaseDatabase.getInstance(DB_INSTANCE_URL).getReference("Locations")
+
+        Thread {
+            while (isServiceStarted) {
+                databaseReference.addListenerForSingleValueEvent(object : ValueEventListener {
+                    override fun onDataChange(snapshot: DataSnapshot) {
+                        for (postSnapshot in snapshot.children) {
+                            val locationHashmap = postSnapshot.value as HashMap<*, *>
+
+                            val locationName = locationHashmap["name"].toString()
+                            var alertMinTemp: Float? = null
+                            var alertMaxTemp: Float? = null
+
+                            if (locationHashmap["alertMinTemp"] != null) {
+                                alertMinTemp = if (locationHashmap["alertMinTemp"] is Double)
+                                    (locationHashmap["alertMinTemp"] as Double).toFloat()
+                                else
+                                    (locationHashmap["alertMinTemp"] as Long).toFloat()
+                            }
+
+                            if (locationHashmap["alertMaxTemp"] != null) {
+                                alertMaxTemp = if (locationHashmap["alertMaxTemp"] is Double)
+                                    (locationHashmap["alertMaxTemp"] as Double).toFloat()
+                                else
+                                    (locationHashmap["alertMaxTemp"] as Long).toFloat()
+                            }
+
+                            Log.d("Service - City", locationName)
+
+                            val currentWeather = getWeather(locationName)
+                            Log.d("Service - Temps", "$alertMinTemp --- $alertMaxTemp --- ${currentWeather.getString("temp")}")
+                            if (alertMinTemp != null && alertMaxTemp != null) {
+                                val currTemp = currentWeather.getString("temp").toFloat()
+                                if (alertMinTemp <= currTemp && currTemp <= alertMaxTemp) {
+                                    databaseReference.child(locationName).child("alertMinTemp")
+                                        .removeValue().addOnSuccessListener {
+                                            Log.d("REMOVED MIN TEMP FOR ", locationName)
+                                        }
+                                    databaseReference.child(locationName).child("alertMaxTemp")
+                                        .removeValue().addOnSuccessListener {
+                                            Log.d("REMOVED MAX TEMP FOR", locationName)
+                                        }
+
+                                    val content =
+                                        "The temperature has reached $currTemp degrees Celsius!"
+                                    val notificationIntent =
+                                        Intent(thisService, MainActivity::class.java)
+                                    val pendingIntent = PendingIntent.getActivity(
+                                        thisService,
+                                        0, notificationIntent, 0
+                                    )
+                                    val notification: Notification =
+                                        NotificationCompat.Builder(thisService, channelId)
+                                            .setContentTitle("Temperature in $locationName")
+                                            .setContentText(content)
+                                            .setSmallIcon(R.drawable.background)
+                                            .setContentIntent(pendingIntent)
+                                            .setAutoCancel(true)
+                                            .setPriority(NotificationCompat.PRIORITY_HIGH)
+                                            .build()
+
+                                    with(NotificationManagerCompat.from(thisService)) {
+                                        notify(currNotificationID++, notification)
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    override fun onCancelled(error: DatabaseError) {
+                        TODO("Not yet implemented")
+                    }
+
+                })
+                Thread.sleep(7000)
             }
-        }
+        }.start()
+
+
+        // Get alerts from meteoromania.ro
+        Thread {
+            val url = "https://www.meteoromania.ro/avertizari-xml.php"
+            val resultXML = URL(url).readText()
+
+            Log.d("XML", resultXML.substring(0, 100))
+
+            Thread.sleep(30000)
+        }.start()
+    }
+
+    fun getWeather(cityName: String): JSONObject {
+        val url =
+            "https://api.openweathermap.org/data/2.5/weather?q=$cityName&appid=361d8bf5e3a482bf972852106c1d0698&units=metric"
+        val resultJSON = URL(url).readText()
+        val resultsJSONObject = JSONObject(resultJSON)
+
+        val mainJSONObject = resultsJSONObject.getJSONObject("main")
+        val windJSONObject = resultsJSONObject.getJSONObject("wind")
+        val weatherJSONArray = resultsJSONObject.getJSONArray("weather")
+
+        val resultWeatherData = JSONObject()
+        resultWeatherData.put("temp", mainJSONObject.getString("temp"))
+        resultWeatherData.put("feels_like", mainJSONObject.getString("feels_like"))
+        resultWeatherData.put("pressure", mainJSONObject.getString("pressure"))
+        resultWeatherData.put("humidity", mainJSONObject.getString("humidity"))
+        resultWeatherData.put("speed", windJSONObject.getString("speed"))
+        resultWeatherData.put("description", weatherJSONArray.getJSONObject(0).getString("main"))
+        Log.d("Description", resultWeatherData.getString("description"))
+        return resultWeatherData
     }
 
     override fun onBind(p0: Intent?): IBinder? {

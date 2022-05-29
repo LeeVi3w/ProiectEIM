@@ -5,6 +5,7 @@ import android.os.Parcelable
 
 data class Location (
     val name: String?,
+    val description: String?,
     val currTemp: Float,
     val feelsLike: Float,
     val windSpeed: Float,
@@ -15,6 +16,7 @@ data class Location (
 ) : Parcelable {
 
     constructor(parcel: Parcel) : this(
+        parcel.readString(),
         parcel.readString(),
         parcel.readFloat(),
         parcel.readFloat(),
@@ -27,6 +29,7 @@ data class Location (
 
     override fun writeToParcel(parcel: Parcel, flags: Int) {
         parcel.writeString(name)
+        parcel.writeString(description)
         parcel.writeFloat(currTemp)
         parcel.writeFloat(feelsLike)
         parcel.writeFloat(windSpeed)

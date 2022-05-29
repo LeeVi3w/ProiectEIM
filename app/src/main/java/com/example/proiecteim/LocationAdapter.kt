@@ -7,11 +7,14 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import com.google.firebase.database.FirebaseDatabase
 import kotlinx.android.synthetic.main.item_location.view.*
 
 class LocationAdapter (
     private val locations: ArrayList<Location>
     ) : RecyclerView.Adapter<LocationAdapter.LocationViewHolder>() {
+
+    private val DB_INSTANCE_URL = "https://proiecteim-b2735-default-rtdb.europe-west1.firebasedatabase.app"
 
     class LocationViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView)
 
@@ -55,6 +58,14 @@ class LocationAdapter (
             }
 
             deleteButton.setOnClickListener {
+                val location = locations[position]
+                val locationDBReference =
+                    location.name?.let { it1 ->
+                        FirebaseDatabase.getInstance(DB_INSTANCE_URL).getReference("Locations").child(
+                            it1
+                        ).removeValue()
+                    }
+
                 locations.removeAt(position)
                 notifyItemRemoved(position)
                 notifyItemRangeChanged(position, locations.size)

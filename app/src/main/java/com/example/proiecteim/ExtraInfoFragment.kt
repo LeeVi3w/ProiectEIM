@@ -1,10 +1,12 @@
 package com.example.proiecteim
 
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.graphics.drawable.toDrawable
 import kotlinx.android.synthetic.main.fragment_extra_info.view.*
 
 /**
@@ -27,6 +29,16 @@ class ExtraInfoFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         val rootView: View = inflater.inflate(R.layout.fragment_extra_info, container, false)
+
+        val description = location!!.description.toString().lowercase()
+        if (description == "clouds")
+            rootView.gifDescription.setImageResource(R.drawable.clouds)
+        else if (description == "clear")
+            rootView.gifDescription.setImageResource(R.drawable.clear)
+        else if (description == "snow")
+            rootView.gifDescription.setImageResource(R.drawable.snow)
+        else if (description == "thunderstorm" || description == "rain")
+            rootView.gifDescription.setImageResource(R.drawable.thunderstorm)
 
         val minTempText = "Feels like\n\n${location!!.feelsLike}°C"
         rootView.tvFeelsLike.text = minTempText

@@ -43,7 +43,10 @@ class MainActivity : AppCompatActivity(), ConnectivityReceiver.ConnectivityRecei
         databaseReference = FirebaseDatabase.getInstance(DB_INSTANCE_URL).getReference("Locations")
         locationAdapter = LocationAdapter(mutableLocationList)
         loadData()
-        startService()
+
+//        Thread {
+            startService()
+//        }.start()
 
         locationList.adapter = locationAdapter
         locationList.layoutManager = LinearLayoutManager(this)
@@ -53,11 +56,23 @@ class MainActivity : AppCompatActivity(), ConnectivityReceiver.ConnectivityRecei
                 for ((position, location) in locationAdapter.getLocations().withIndex()) {
                     val newLocation = location.name?.let { getLocation(it) }
                     if (newLocation != null) {
-                        newLocation.alertMinTemp = location.alertMinTemp
-                        newLocation.alertMaxTemp = location.alertMaxTemp
+                        newLocation.alertMinTemp = null
+                        newLocation.alertMaxTemp = null
 
-                        databaseReference.child(location.name).setValue(newLocation).addOnSuccessListener {
-                            locationAdapter.setLocation(position, newLocation)
+//                        // If the alert hase been removed by the service from the DB, don't insert it again
+                        databaseReference.child(location.name).child("alertMinTemp").get().addOnSuccessListener { result1 ->
+                                val dbAlertMinTemp = if (result1.value == null) null else if (result1.value is Long) result1.value as Long else result1.value as Double
+                            databaseReference.child(location.name).child("alertMaxTemp").get().addOnSuccessListener { result2 ->
+                                val dbAlertMaxTemp = if (result2.value == null) null else if (result2.value is Long) result2.value as Long else result2.value as Double
+                                if (dbAlertMinTemp != null && dbAlertMaxTemp != null) {
+                                    newLocation.alertMinTemp = dbAlertMinTemp.toFloat()
+                                    newLocation.alertMaxTemp = dbAlertMaxTemp.toFloat()
+                                }
+
+                                databaseReference.child(location.name).setValue(newLocation).addOnSuccessListener {
+                                    locationAdapter.setLocation(position, newLocation)
+                                }
+                            }
                         }
                     }
                 }
@@ -155,8 +170,15 @@ class MainActivity : AppCompatActivity(), ConnectivityReceiver.ConnectivityRecei
                     val locationHashmap = postSnapshot.value as HashMap<*, *>
 
                     val name = locationHashmap["name"].toString()
-                    val currTemp = locationHashmap["currTemp"] as Double
-                    val feelsLike = locationHashmap["feelsLike"] as Double
+                    val description = locationHashmap["description"].toString()
+                    val currTemp = if (locationHashmap["currTemp"] is Long)
+                        (locationHashmap["currTemp"] as Long).toDouble()
+                    else
+                        locationHashmap["currTemp"] as Double
+                    val feelsLike = if (locationHashmap["feelsLike"] is Long)
+                        (locationHashmap["feelsLike"] as Long).toDouble()
+                    else
+                        locationHashmap["feelsLike"] as Double
                     val windSpeed = locationHashmap["windSpeed"] as Double
                     val pressure = locationHashmap["pressure"] as Long
                     val humidity = locationHashmap["humidity"] as Long
@@ -179,6 +201,7 @@ class MainActivity : AppCompatActivity(), ConnectivityReceiver.ConnectivityRecei
 
                     val newLocation = Location(
                         name,
+                        description,
                         currTemp.toFloat(),
                         feelsLike.toFloat(),
                         windSpeed.toFloat(),
@@ -215,6 +238,7 @@ class MainActivity : AppCompatActivity(), ConnectivityReceiver.ConnectivityRecei
             }
 
             if (weatherData != null) {
+                val description = weatherData!!.getString("description")
                 val currTemp = weatherData!!.getString("temp")
                 val feelsLike = weatherData!!.getString("feels_like")
                 val windSpeed = weatherData!!.getString("speed")
@@ -223,6 +247,7 @@ class MainActivity : AppCompatActivity(), ConnectivityReceiver.ConnectivityRecei
 
                 return Location(
                     cityName,
+                    description,
                     currTemp.toFloat(),
                     feelsLike.toFloat(),
                     windSpeed.toFloat(),
@@ -236,34 +261,39 @@ class MainActivity : AppCompatActivity(), ConnectivityReceiver.ConnectivityRecei
         return null
     }
 
-    private fun getWeather(cityName: String): JSONObject {
-        val url =
-            "https://api.openweathermap.org/data/2.5/weather?q=$cityName&appid=361d8bf5e3a482bf972852106c1d0698&units=metric"
-        val resultJSON = URL(url).readText()
-        val resultsJSONObject = JSONObject(resultJSON)
-
-        val mainJSONObject = resultsJSONObject.getJSONObject("main")
-        val windJSONObject = resultsJSONObject.getJSONObject("wind")
-
-        val resultWeatherData = JSONObject()
-        resultWeatherData.put("temp", mainJSONObject.getString("temp"))
-        resultWeatherData.put("feels_like", mainJSONObject.getString("feels_like"))
-        resultWeatherData.put("pressure", mainJSONObject.getString("pressure"))
-        resultWeatherData.put("humidity", mainJSONObject.getString("humidity"))
-        resultWeatherData.put("speed", windJSONObject.getString("speed"))
-        return resultWeatherData
-    }
-
     private fun startService() {
         val serviceIntent = Intent(this, AlertService::class.java)
-        val input = "Acesta este un serviciu"
-        serviceIntent.putExtra("inputExtra", input)
+//        val input = "Acesta este un serviciu"
+//        serviceIntent.putExtra("inputExtra", input)
         ContextCompat.startForegroundService(this, serviceIntent)
     }
 
     private fun stopServiceWrapper() {
         val serviceIntent = Intent(this, AlertService::class.java)
         stopService(serviceIntent)
+    }
+
+    companion object {
+        fun getWeather(cityName: String): JSONObject {
+            val url =
+                "https://api.openweathermap.org/data/2.5/weather?q=$cityName&appid=361d8bf5e3a482bf972852106c1d0698&units=metric"
+            val resultJSON = URL(url).readText()
+            val resultsJSONObject = JSONObject(resultJSON)
+
+            val mainJSONObject = resultsJSONObject.getJSONObject("main")
+            val windJSONObject = resultsJSONObject.getJSONObject("wind")
+            val weatherJSONArray = resultsJSONObject.getJSONArray("weather")
+
+            val resultWeatherData = JSONObject()
+            resultWeatherData.put("temp", mainJSONObject.getString("temp"))
+            resultWeatherData.put("feels_like", mainJSONObject.getString("feels_like"))
+            resultWeatherData.put("pressure", mainJSONObject.getString("pressure"))
+            resultWeatherData.put("humidity", mainJSONObject.getString("humidity"))
+            resultWeatherData.put("speed", windJSONObject.getString("speed"))
+            resultWeatherData.put("description", weatherJSONArray.getJSONObject(0).getString("main"))
+
+            return resultWeatherData
+        }
     }
 
 //    private fun isMyServiceRunning(serviceClass: Class<*>): Boolean {
