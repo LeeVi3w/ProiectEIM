@@ -36,8 +36,6 @@ class SetAlertFragment : Fragment() {
 
         // Create a new ExtraInfoFragment using same location obj and replace the SetAlertFragment
         rootView.btnConfirmAlert.setOnClickListener {
-            // Some other logic will go here
-            Log.d("SetAlertFragment", etAlertMinTemp.text.toString())
             val alertMinTemp = etAlertMinTemp.text.toString().toFloatOrNull()
             val alertMaxTemp = etAlertMaxTemp.text.toString().toFloatOrNull()
 
@@ -56,14 +54,13 @@ class SetAlertFragment : Fragment() {
                         Log.d("addedAlert", location.toString())
                     }
                 }
-//                Log.d("SetAlertFragment", activity?.intent?.extras?.getParcelableArrayList<Location>("LocationList").toString())
-                if (locationList == null)
-//                    Log.d("SetAlertFragment", "Fuck")
-                requireActivity().supportFragmentManager.beginTransaction().apply {
-                    replace(R.id.flLocationFragment, ExtraInfoFragment.newInstance(location))
-                    commit()
-                }
 
+                if (locationList == null) {
+                    requireActivity().supportFragmentManager.beginTransaction().apply {
+                        replace(R.id.flLocationFragment, ExtraInfoFragment.newInstance(location))
+                        commit()
+                    }
+                }
             }
         }
 

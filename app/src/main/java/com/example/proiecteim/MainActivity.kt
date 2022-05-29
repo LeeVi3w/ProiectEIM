@@ -49,7 +49,6 @@ class MainActivity : AppCompatActivity(), ConnectivityReceiver.ConnectivityRecei
         locationList.adapter = locationAdapter
         locationList.layoutManager = LinearLayoutManager(this)
         runnable = Runnable {
-//            Log.d("postDelayed", "RUNNABLE RUNNABLE RUNNABLE RUNNABLE")
             if (hasInternetConnection) {
                 for ((position, location) in locationAdapter.getLocations().withIndex()) {
                     val newLocation = location.name?.let { getLocation(it) }
@@ -57,7 +56,7 @@ class MainActivity : AppCompatActivity(), ConnectivityReceiver.ConnectivityRecei
                         newLocation.alertMinTemp = null
                         newLocation.alertMaxTemp = null
 
-//                        // If the alert hase been removed by the service from the DB, don't insert it again
+                        // If the alert has been removed by the service from the DB, don't insert it again
                         databaseReference.child(location.name).child("alertMinTemp").get().addOnSuccessListener { result1 ->
                                 val dbAlertMinTemp = if (result1.value == null) null else if (result1.value is Long) result1.value as Long else result1.value as Double
                             databaseReference.child(location.name).child("alertMaxTemp").get().addOnSuccessListener { result2 ->
@@ -95,8 +94,10 @@ class MainActivity : AppCompatActivity(), ConnectivityReceiver.ConnectivityRecei
         }
 
         btMap.setOnClickListener {
-            val intent = Intent(this, MapActivity::class.java)
-            startActivity(intent)
+            if (hasInternetConnection) {
+                val intent = Intent(this, MapActivity::class.java)
+                startActivity(intent)
+            }
         }
     }
 

@@ -104,10 +104,7 @@ class AlertService : Service() {
                                     (locationHashmap["alertMaxTemp"] as Long).toFloat()
                             }
 
-//                            Log.d("Service - City", locationName)
-
                             val currentWeather = getWeather(locationName)
-//                            Log.d("Service - Temps", "$alertMinTemp --- $alertMaxTemp --- ${currentWeather.getString("temp")}")
                             if (alertMinTemp != null && alertMaxTemp != null) {
                                 val currTemp = currentWeather.getString("temp").toFloat()
                                 if (alertMinTemp <= currTemp && currTemp <= alertMaxTemp) {
@@ -183,7 +180,7 @@ class AlertService : Service() {
         resultWeatherData.put("humidity", mainJSONObject.getString("humidity"))
         resultWeatherData.put("speed", windJSONObject.getString("speed"))
         resultWeatherData.put("description", weatherJSONArray.getJSONObject(0).getString("main"))
-//        Log.d("Description", resultWeatherData.getString("description"))
+
         return resultWeatherData
     }
 
